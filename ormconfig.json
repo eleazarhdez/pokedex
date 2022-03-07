@@ -7,6 +7,7 @@
   "database": "pokedex",
   "entities": ["dist/**/*.entity{.ts,.js}"],
   "synchronize": true,
+  "seeds": ["dist/seeds/*.js"],
   "logging": "error",
   "keepConnectionAlive": true
 }
