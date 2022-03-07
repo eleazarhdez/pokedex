@@ -1,0 +1,12 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5431,
+  "username": "pokemonTrainer",
+  "password": "pokemonPass",
+  "database": "pokedex",
+  "entities": ["dist/**/*.entity{.ts,.js}"],
+  "synchronize": true,
+  "logging": "error",
+  "keepConnectionAlive": true
+}
