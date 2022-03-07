@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from './../src/app.module';
 
-describe('AppController (e2e)', () => {
+describe('Pokedex e2e suite test', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
@@ -15,10 +15,11 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it('Get pokemon by id', async () => {
+    const id = 1;
+    const result = await request(app.getHttpServer())
+      .get(`/pokemon/${id}`)
+      .expect(200);
+    expect(result.body.name).toEqual('Bulbasaur');
   });
 });
