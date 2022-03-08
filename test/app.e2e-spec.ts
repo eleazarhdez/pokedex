@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from './../src/app.module';
 
@@ -12,6 +12,7 @@ describe('Pokedex e2e suite test', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     await app.init();
   });
 
@@ -25,5 +26,11 @@ describe('Pokedex e2e suite test', () => {
     const id = 152;
     const result = await request(app.getHttpServer()).get(`/pokemon/${id}`).expect(404);
     expect(result.body.message).toEqual('Pokemon not Found');
+  });
+
+  it('Get pokemon by id bad request', async () => {
+    const id = 'test';
+    const result = await request(app.getHttpServer()).get(`/pokemon/${id}`).expect(400);
+    expect(result.body.message).toEqual(['id must be an integer number']);
   });
 });
