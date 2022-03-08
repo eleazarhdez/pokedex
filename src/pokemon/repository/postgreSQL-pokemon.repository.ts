@@ -1,3 +1,4 @@
+import { NotFoundError } from './../domain/not-found.error';
 import { PokemonEntity } from './entities/pokemon.entity';
 import { Injectable } from '@nestjs/common';
 import { Pokemon } from '../service/models/pokemon';
@@ -29,6 +30,9 @@ export class PostgreSQLPokemonRepository implements PokemonRepository {
       where: { id: pokemonId },
       relations: this.pokemonRelations,
     });
+    if (!pokemonEntity) {
+      throw new NotFoundError('Pokemon not Found');
+    }
     return PokemonMapper.entityToPokemon(pokemonEntity);
   }
 }

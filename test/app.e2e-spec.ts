@@ -17,9 +17,13 @@ describe('Pokedex e2e suite test', () => {
 
   it('Get pokemon by id', async () => {
     const id = 1;
-    const result = await request(app.getHttpServer())
-      .get(`/pokemon/${id}`)
-      .expect(200);
+    const result = await request(app.getHttpServer()).get(`/pokemon/${id}`).expect(200);
     expect(result.body.name).toEqual('Bulbasaur');
+  });
+
+  it('Get pokemon by id not found', async () => {
+    const id = 152;
+    const result = await request(app.getHttpServer()).get(`/pokemon/${id}`).expect(404);
+    expect(result.body.message).toEqual('Pokemon not Found');
   });
 });
