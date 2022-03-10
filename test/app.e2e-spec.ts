@@ -12,25 +12,48 @@ describe('Pokedex e2e suite test', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
     await app.init();
   });
 
   it('Get pokemon by id', async () => {
     const id = 1;
     const result = await request(app.getHttpServer()).get(`/pokemon/${id}`).expect(200);
-    expect(result.body.name).toEqual('Bulbasaur');
+    expect(result.body).toMatchSnapshot();
   });
 
-  it('Get pokemon by id not found', async () => {
+  it('Pokemon Not Found', async () => {
     const id = 152;
     const result = await request(app.getHttpServer()).get(`/pokemon/${id}`).expect(404);
-    expect(result.body.message).toEqual('Pokemon not Found');
+    expect(result.body).toMatchSnapshot();
   });
 
-  it('Get pokemon by id bad request', async () => {
+  it('Bad Request', async () => {
     const id = 'test';
     const result = await request(app.getHttpServer()).get(`/pokemon/${id}`).expect(400);
-    expect(result.body.message).toEqual(['id must be an integer number']);
+    expect(result.body).toMatchSnapshot();
   });
+
+  it('Get all Pokemons', async () => {
+    const result = await request(app.getHttpServer()).get('/pokemon').expect(200);
+    expect(result.body).toMatchSnapshot();
+  });
+
+  test('Get pokemons paginated', async () => {
+    const page = 1;
+    const take = 5;
+    const result = await request(app.getHttpServer()).get(`/pokemon?page=${page}&take=${take}`).expect(200);
+    expect(result.body).toMatchSnapshot();
+  });
+
+  test('Get pokemon by name', async () => {
+    const name = 'Bulbasaur';
+    const result = await request(app.getHttpServer()).get(`/pokemon?name=${name}`).expect(200);
+    expect(result.body).toMatchSnapshot();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
 });

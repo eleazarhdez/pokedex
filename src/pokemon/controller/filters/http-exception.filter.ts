@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, NotFoundException } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { NotFoundError } from '../../domain/not-found.error';
+import { NotFoundError } from '../../domain/errors/not-found.error';
 
 @Catch()
 export class HttpExceptionFilter extends BaseExceptionFilter {
