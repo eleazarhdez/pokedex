@@ -21,4 +21,8 @@ export class PokemonService {
   async getPokemons(pageOptions: PageOptions, queryParams: QueryParams): Promise<Page<Pokemon>> {
     return await this.pokemonRepository.getPokemons(pageOptions, queryParams);
   }
+
+  async getPokemonsTypes(pageOptions: PageOptions, queryParams: QueryParams): Promise<Page<string>> {
+    return await this.pokemonRepository.getPokemonTypes(pageOptions, queryParams);
+  }
 }

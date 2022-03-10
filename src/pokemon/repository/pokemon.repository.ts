@@ -7,4 +7,7 @@ export interface PokemonRepository {
   getPokemonById(id: number): Promise<Pokemon>;
 
   getPokemons(pageOptions?: PageOptions, queryParams?: QueryParams): Promise<Page<Pokemon>>;
+
+  getPokemonTypes(pageOptions?: PageOptions, queryParams?: QueryParams): Promise<Page<string>>;
+
 }

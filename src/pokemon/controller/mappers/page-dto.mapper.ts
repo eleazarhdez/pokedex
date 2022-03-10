@@ -13,4 +13,10 @@ export class PageDtoMapper {
     const data = page.data.map((pokemon) => PokemonDtoMapper.pokemonToPokemonDto(pokemon));
     return new Page(data, meta);
   }
+
+  public static pokemonTypePageToPokemonTypePageDto(page: Page<string>): PageDto<string> {
+    const meta: PageMetaDto = { ...page.meta };
+    const data = { ...page.data };
+    return new Page(data, meta);
+  }
 }

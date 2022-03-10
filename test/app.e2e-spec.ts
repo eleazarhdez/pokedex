@@ -52,6 +52,11 @@ describe('Pokedex e2e suite test', () => {
     expect(result.body).toMatchSnapshot();
   });
 
+  it('Get all Pokemon Types', async () => {
+    const result = await request(app.getHttpServer()).get('/pokemon/types').expect(200);
+    expect(result.body).toMatchSnapshot();
+  });
+
   afterAll(async () => {
     await app.close();
   });

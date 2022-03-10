@@ -1,3 +1,4 @@
+import { PokemonTypeEntity } from './entities/pokemon-type.entity';
 import { NotFoundError } from '../domain/errors/not-found.error';
 import { PokemonEntity } from './entities/pokemon.entity';
 import { Injectable } from '@nestjs/common';
@@ -16,6 +17,8 @@ export class PostgreSQLPokemonRepository implements PokemonRepository {
   constructor(
     @InjectRepository(PokemonEntity)
     private pokemonRepository: Repository<PokemonEntity>,
+    @InjectRepository(PokemonTypeEntity)
+    private pokemonTypeRepository: Repository<PokemonTypeEntity>,
   ) {}
 
   pokemonRelations = [
@@ -73,7 +76,23 @@ export class PostgreSQLPokemonRepository implements PokemonRepository {
     }
     const pokemons: Pokemon[] = pokemonEntities.map((pokemonEntity) => PokemonMapper.entityToPokemon(pokemonEntity));
     const pageMeta = new PageMeta(pageOptions, itemCount);
-
     return new Page(pokemons, pageMeta);
+  }
+
+  async getPokemonTypes(pageOptions?: PageOptions, queryParams?: QueryParams): Promise<Page<string>> {
+    const [pokemonTypeEntities, itemCount] = await this.pokemonTypeRepository.findAndCount({
+      where: queryParams.type ? { type: queryParams.type } : undefined,
+      skip: pageOptions.skip,
+      take: pageOptions.take,
+    });
+
+    if (Array.isArray(pokemonTypeEntities) && !pokemonTypeEntities.length) {
+      throw new NotFoundError('Any pokemon type was found');
+    }
+    const pokemonTypes: string[] = [];
+    pokemonTypeEntities.map((pokemonType) => pokemonTypes.push(pokemonType.type));
+
+    const pageMeta = new PageMeta(pageOptions, itemCount);
+    return new Page(pokemonTypes, pageMeta);
   }
 }

@@ -17,6 +17,18 @@ import { PathParamsDto } from './dtos/paramsDtos/path-params.dto';
 export class PokemonController {
   constructor(private readonly pokemonService: PokemonService) {}
  
+  @ApiResponse({ type: String, isArray: true })
+  @Get('/types')
+  async findPokemonsTypes(
+    @Query() pageOptionsDto: PageOptionsDto,
+    @Query() queryParamsDto: QueryParamsDto,
+  ): Promise<PageDto<string>> {
+    const pageOptions = new PageOptions(pageOptionsDto.order, pageOptionsDto.page, pageOptionsDto.take);
+    const queryParams = new QueryParams(queryParamsDto.type, queryParamsDto.name);
+    const pokemonTypePage = await this.pokemonService.getPokemonsTypes(pageOptions, queryParams);
+    return PageDtoMapper.pokemonTypePageToPokemonTypePageDto(pokemonTypePage);
+  }
+
   @ApiResponse({ type: PokemonDto })
   @Get(':id')
   async findPokemonById(@Param() pathParamsDto: PathParamsDto): Promise<PokemonDto> {
@@ -24,7 +36,7 @@ export class PokemonController {
     return PokemonDtoMapper.pokemonToPokemonDto(pokemon);
   }
 
-  @ApiResponse({ type: PokemonDto })
+  @ApiResponse({ type: PokemonDto, isArray: true })
   @Get()
   async findPokemons(
     @Query() pageOptionsDto: PageOptionsDto,
@@ -35,4 +47,6 @@ export class PokemonController {
     const pokemonPage = await this.pokemonService.getPokemons(pageOptions, queryParams);
     return PageDtoMapper.pokemonPageToPokemonPageDto(pokemonPage);
   }
+
+
 }
