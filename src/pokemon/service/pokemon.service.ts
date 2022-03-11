@@ -19,10 +19,18 @@ export class PokemonService {
   }
 
   async getPokemons(pageOptions: PageOptions, queryParams: QueryParams): Promise<Page<Pokemon>> {
-    return await this.pokemonRepository.getPokemons(pageOptions, queryParams);
+    return this.pokemonRepository.getPokemons(pageOptions, queryParams);
   }
 
   async getPokemonsTypes(pageOptions: PageOptions, queryParams: QueryParams): Promise<Page<string>> {
-    return await this.pokemonRepository.getPokemonTypes(pageOptions, queryParams);
+    return this.pokemonRepository.getPokemonTypes(pageOptions, queryParams);
+  }
+
+  async markPokemonAsFavorite(id: number, favorite: boolean): Promise<void> {
+    return this.pokemonRepository.markPokemonAsFavorite(id, favorite);
+  }
+
+  async getFavoritePokemons(pageOptions: PageOptions): Promise<Page<string>> {
+    return this.pokemonRepository.getFavoritePokemons(pageOptions);
   }
 }

@@ -57,6 +57,32 @@ describe('Pokedex e2e suite test', () => {
     expect(result.body).toMatchSnapshot();
   });
 
+  it('Mark pokemon as favorite', async () => {
+    const id = 1;
+    await request(app.getHttpServer()).put(`/pokemon/${id}`).send({ favorite: true }).expect(200);
+    const result = await request(app.getHttpServer()).get(`/pokemon/favorites`).expect(200);
+    expect(result.body).toMatchSnapshot();
+  });
+
+  it('Remove pokemon as favorite', async () => {
+    const id = 1;
+    await request(app.getHttpServer()).put(`/pokemon/${id}`).send({ favorite: false }).expect(200);
+    const result = await request(app.getHttpServer()).get(`/pokemon/favorites`).expect(200);
+    expect(result.body).toMatchSnapshot();
+  });
+
+  it('Favorite field can not be a number, has to be a boolean. Bad Request', async () => {
+    const id = 1;
+    const result = await request(app.getHttpServer()).put(`/pokemon/${id}`).send({ favorite: 1 }).expect(400);
+    expect(result.body).toMatchSnapshot();
+  });
+
+  it('Favorite field can not be a string, has to be boolean. Bad Request', async () => {
+    const id = '1';
+    const result = await request(app.getHttpServer()).put(`/pokemon/${id}`).send({ favorite: 'true' }).expect(400);
+    expect(result.body).toMatchSnapshot();
+  });
+
   afterAll(async () => {
     await app.close();
   });

@@ -1,3 +1,4 @@
+import { FavoritePokemonEntity } from './repository/entities/favorite-pokemon.entity';
 import { PostgreSQLPokemonRepository } from './repository/postgreSQL-pokemon.repository';
 import { Module } from '@nestjs/common';
 import { pokemonRepositorySymbol } from './pokemon.provider';
@@ -11,7 +12,9 @@ import { PokemonService } from './service/pokemon.service';
 import { PokemonController } from './controller/pokemon.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PokemonEntity, PokemonTypeEntity, AttackEntity, AttackTypeEntity])],
+  imports: [
+    TypeOrmModule.forFeature([PokemonEntity, PokemonTypeEntity, AttackEntity, AttackTypeEntity, FavoritePokemonEntity]),
+  ],
   controllers: [PokemonController],
   providers: [
     PokemonService,

@@ -1,6 +1,7 @@
+import { FavoritePokemonDto } from './dtos/favorite-pokemon.dto';
 import { PageDtoMapper } from './mappers/page-dto.mapper';
 import { PokemonDto } from './dtos/pokemon.dto';
-import { Controller, Get, Param, Query, UseFilters } from '@nestjs/common';
+import { Body, Controller, Get, Header, Param, Put, Query, UseFilters } from '@nestjs/common';
 import { PokemonService } from '../service/pokemon.service';
 import { PokemonDtoMapper } from './mappers/pokemon-dto.mapper';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
@@ -26,7 +27,15 @@ export class PokemonController {
     const pageOptions = new PageOptions(pageOptionsDto.order, pageOptionsDto.page, pageOptionsDto.take);
     const queryParams = new QueryParams(queryParamsDto.type, queryParamsDto.name);
     const pokemonTypePage = await this.pokemonService.getPokemonsTypes(pageOptions, queryParams);
-    return PageDtoMapper.pokemonTypePageToPokemonTypePageDto(pokemonTypePage);
+    return PageDtoMapper.stringPageToStringPageDto(pokemonTypePage);
+  }
+
+  @ApiResponse({ type: String, isArray: true })
+  @Get('/favorites')
+  async findFavoritePokemons(@Query() pageOptionsDto: PageOptionsDto): Promise<PageDto<string>> {
+    const pageOptions = new PageOptions(pageOptionsDto.order, pageOptionsDto.page, pageOptionsDto.take);
+    const favoritePokemonPage = await this.pokemonService.getFavoritePokemons(pageOptions);
+    return PageDtoMapper.stringPageToStringPageDto(favoritePokemonPage);
   }
 
   @ApiResponse({ type: PokemonDto })
@@ -46,6 +55,15 @@ export class PokemonController {
     const queryParams = new QueryParams(queryParamsDto.type, queryParamsDto.name);
     const pokemonPage = await this.pokemonService.getPokemons(pageOptions, queryParams);
     return PageDtoMapper.pokemonPageToPokemonPageDto(pokemonPage);
+  }
+
+  @Put(':id')
+  @Header('Content-Type', 'application/json')
+  async markFavoriteById(
+    @Param() pathParamsDto: PathParamsDto,
+    @Body() pokemonFavoriteDto: FavoritePokemonDto,
+  ): Promise<void> {
+    return this.pokemonService.markPokemonAsFavorite(pathParamsDto.id, pokemonFavoriteDto.favorite);
   }
 
 

@@ -10,4 +10,8 @@ export interface PokemonRepository {
 
   getPokemonTypes(pageOptions?: PageOptions, queryParams?: QueryParams): Promise<Page<string>>;
 
+  markPokemonAsFavorite(id: number, favorite: boolean): Promise<void>;
+
+  getFavoritePokemons(pageOptions?: PageOptions);
+
 }

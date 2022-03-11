@@ -1,3 +1,4 @@
+import { FavoritePokemonEntity } from './entities/favorite-pokemon.entity';
 import { PokemonTypeEntity } from './entities/pokemon-type.entity';
 import { NotFoundError } from '../domain/errors/not-found.error';
 import { PokemonEntity } from './entities/pokemon.entity';
@@ -5,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 import { Pokemon } from '../service/models/pokemon';
 import { PokemonRepository } from './pokemon.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { PokemonMapper } from './mappers/pokemon.mapper';
 import { PageMeta } from '../domain/pagination/page-meta';
 import { PageOptions } from '../domain/pagination/page-options';
@@ -19,6 +20,8 @@ export class PostgreSQLPokemonRepository implements PokemonRepository {
     private pokemonRepository: Repository<PokemonEntity>,
     @InjectRepository(PokemonTypeEntity)
     private pokemonTypeRepository: Repository<PokemonTypeEntity>,
+    @InjectRepository(FavoritePokemonEntity)
+    private favoritePokemonRepository: Repository<FavoritePokemonEntity>,
   ) {}
 
   pokemonRelations = [
@@ -94,5 +97,36 @@ export class PostgreSQLPokemonRepository implements PokemonRepository {
 
     const pageMeta = new PageMeta(pageOptions, itemCount);
     return new Page(pokemonTypes, pageMeta);
+  }
+
+  async markPokemonAsFavorite(pokemonId: number, isFavorite: boolean): Promise<void> {
+    try {
+      const pokemonFavorite: FavoritePokemonEntity = { id: pokemonId, favorite: isFavorite };
+      await this.favoritePokemonRepository.save(pokemonFavorite);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async getFavoritePokemons(pageOptions?: PageOptions): Promise<Page<string>> {
+    const favoritePokemonIds = await this.favoritePokemonRepository.find({
+      select: ['id'],
+      where: { favorite: true },
+    });
+    const favoriteIds: number[] = [];
+    favoritePokemonIds.map((favoritePokemon) => favoriteIds.push(favoritePokemon.id));
+    const [favoritePokemons, itemCount] = await this.pokemonRepository.findAndCount({
+      where: { id: In(favoriteIds) },
+      skip: pageOptions.skip,
+      take: pageOptions.take,
+    });
+
+    if (Array.isArray(favoritePokemons) && !favoritePokemons.length) {
+      throw new NotFoundError('Any favorite pokemon was found');
+    }
+    const favoritePokemonNames: string[] = [];
+    favoritePokemons.map((pokemonName) => favoritePokemonNames.push(pokemonName.name));
+    const pageMeta = new PageMeta(pageOptions, itemCount);
+    return new Page(favoritePokemonNames, pageMeta);
   }
 }
