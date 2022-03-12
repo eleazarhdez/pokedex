@@ -13,6 +13,6 @@ export class QueryParamsDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  @Transform((type) => type.value.charAt(0).toUpperCase() + type.value.substring(1))
+  @Transform((name) => name.value.charAt(0).toUpperCase() + name.value.substring(1))
   readonly name?: string;
 }

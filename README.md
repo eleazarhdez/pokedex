@@ -35,3 +35,5 @@ $ npm run test:e2e
 # e2e updating snapshots
 $ npm run test:e2e:update:snapshot
 ```
+Details about implementation in [Implementation Details Document](./IMPL-DETAILS.md)
+
