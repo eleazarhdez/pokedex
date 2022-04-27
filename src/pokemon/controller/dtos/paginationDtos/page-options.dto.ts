@@ -23,5 +23,4 @@ export class PageOptionsDto {
   @Max(30)
   @IsOptional()
   readonly take?: number = 20;
-
 }

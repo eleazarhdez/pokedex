@@ -11,12 +11,12 @@ export class PageDtoMapper {
   public static pokemonPageToPokemonPageDto(page: Page<Pokemon>): PageDto<PokemonDto> {
     const meta: PageMetaDto = { ...page.meta };
     const data = page.data.map((pokemon) => PokemonDtoMapper.pokemonToPokemonDto(pokemon));
-    return new Page(data, meta);
+    return new PageDto(data, meta);
   }
 
   public static stringPageToStringPageDto(page: Page<string>): PageDto<string> {
     const meta: PageMetaDto = { ...page.meta };
     const data = { ...page.data };
-    return new Page(data, meta);
+    return new PageDto(data, meta);
   }
 }

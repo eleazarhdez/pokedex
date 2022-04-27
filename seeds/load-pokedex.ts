@@ -12,9 +12,7 @@ export default class LoadPokedex implements Seeder {
   pokemonAttacksCategories: AttackTypeEntity[] = [];
 
   public async run(factory: Factory, connection: Connection): Promise<any> {
-    this.pokemonTypesInserted = await connection
-      .getRepository(PokemonTypeEntity)
-      .find();
+    this.pokemonTypesInserted = await connection.getRepository(PokemonTypeEntity).find();
     this.pokemonAttacksCategories = await this.saveAttackCategories(connection);
 
     for (let i = 0; i < pokemons.length; i++) {
@@ -25,10 +23,7 @@ export default class LoadPokedex implements Seeder {
     }
   }
 
-  public async buildPokemon(
-    connection: Connection,
-    pokemonItem: any,
-  ): Promise<PokemonEntity> {
+  public async buildPokemon(connection: Connection, pokemonItem: any): Promise<PokemonEntity> {
     const pokemon = connection.manager.create(PokemonEntity, {
       id: parseInt(pokemonItem.id),
       name: pokemonItem.name,
@@ -46,16 +41,10 @@ export default class LoadPokedex implements Seeder {
     return pokemon;
   }
 
-  public createPartialPokemonTypes(
-    connection: Connection,
-    pokemonTypes: string[],
-  ): PokemonTypeEntity[] {
+  public createPartialPokemonTypes(connection: Connection, pokemonTypes: string[]): PokemonTypeEntity[] {
     const pokemonTypesEntity: PokemonTypeEntity[] = [];
     pokemonTypes.map((pokemonTypeObject) => {
-      const partialPokemonEntityType = connection.manager.create(
-        PokemonTypeEntity,
-        { type: pokemonTypeObject },
-      );
+      const partialPokemonEntityType = connection.manager.create(PokemonTypeEntity, { type: pokemonTypeObject });
       pokemonTypesEntity.push(partialPokemonEntityType);
     });
     return pokemonTypesEntity;
@@ -63,10 +52,7 @@ export default class LoadPokedex implements Seeder {
 
   public findPokemonTypesToInsert(allPokemonTypes: string[]): string[] {
     const pokemonTypesToInsert = allPokemonTypes.filter(
-      (typeName) =>
-        !this.pokemonTypesInserted.some(
-          (pokemonTypeEntity) => pokemonTypeEntity.type === typeName,
-        ),
+      (typeName) => !this.pokemonTypesInserted.some((pokemonTypeEntity) => pokemonTypeEntity.type === typeName),
     );
     return pokemonTypesToInsert;
   }
@@ -82,61 +68,38 @@ export default class LoadPokedex implements Seeder {
     return pokemonAttackTypes;
   }
 
-  public async insertAll(
-    connection: Connection,
-    rawPokemon: any,
-  ): Promise<void> {
+  public async insertAll(connection: Connection, rawPokemon: any): Promise<void> {
     const pokemon = await this.buildPokemon(connection, rawPokemon);
     const pokemonAttackTypes = this.getPokemonAttackTypes(rawPokemon.attacks);
 
     const allTypes = [
-      ...new Set([
-        ...rawPokemon.types,
-        ...rawPokemon.resistant,
-        ...rawPokemon.weaknesses,
-        ...pokemonAttackTypes,
-      ]),
+      ...new Set([...rawPokemon.types, ...rawPokemon.resistant, ...rawPokemon.weaknesses, ...pokemonAttackTypes]),
     ];
     const pokemonTypesNameToInsert = this.findPokemonTypesToInsert(allTypes);
-    const pokemonTypesEntityToInsert = this.createPartialPokemonTypes(
-      connection,
-      pokemonTypesNameToInsert,
-    );
+    const pokemonTypesEntityToInsert = this.createPartialPokemonTypes(connection, pokemonTypesNameToInsert);
     let pokemonTypeEntitiescreated;
     try {
-      pokemonTypeEntitiescreated = await connection
-        .getRepository(PokemonTypeEntity)
-        .save(pokemonTypesEntityToInsert);
+      pokemonTypeEntitiescreated = await connection.getRepository(PokemonTypeEntity).save(pokemonTypesEntityToInsert);
     } catch (error) {
       console.log(error);
     }
-    this.pokemonTypesInserted = [
-      ...new Set([...pokemonTypeEntitiescreated, ...this.pokemonTypesInserted]),
-    ];
+    this.pokemonTypesInserted = [...new Set([...pokemonTypeEntitiescreated, ...this.pokemonTypesInserted])];
 
-    const filteredArrayTypes = this.pokemonTypesInserted.filter(
-      (pokemonTypeName) => rawPokemon.types.includes(pokemonTypeName.type),
+    const filteredArrayTypes = this.pokemonTypesInserted.filter((pokemonTypeName) =>
+      rawPokemon.types.includes(pokemonTypeName.type),
     );
 
-    const filteredArrayResistant = this.pokemonTypesInserted.filter(
-      (pokemonTypeName) => rawPokemon.resistant.includes(pokemonTypeName.type),
+    const filteredArrayResistant = this.pokemonTypesInserted.filter((pokemonTypeName) =>
+      rawPokemon.resistant.includes(pokemonTypeName.type),
     );
 
-    const filteredArrayWeaknesses = this.pokemonTypesInserted.filter(
-      (pokemonTypeName) => rawPokemon.weaknesses.includes(pokemonTypeName.type),
+    const filteredArrayWeaknesses = this.pokemonTypesInserted.filter((pokemonTypeName) =>
+      rawPokemon.weaknesses.includes(pokemonTypeName.type),
     );
 
-    const pokemonAttacks = await this.getAndCreatePokemonAttacks(
-      connection,
-      rawPokemon.attacks,
-    );
+    const pokemonAttacks = await this.getAndCreatePokemonAttacks(connection, rawPokemon.attacks);
 
-    await connection.manager
-      .createQueryBuilder()
-      .insert()
-      .into(PokemonEntity)
-      .values(pokemon)
-      .execute();
+    await connection.manager.createQueryBuilder().insert().into(PokemonEntity).values(pokemon).execute();
 
     await connection.manager
       .createQueryBuilder()
@@ -163,10 +126,7 @@ export default class LoadPokedex implements Seeder {
       .add(pokemonAttacks.flatMap((attack) => attack.id));
   }
 
-  public async addEvolutionInfo(
-    connection: Connection,
-    rawPokemon: any,
-  ): Promise<void> {
+  public async addEvolutionInfo(connection: Connection, rawPokemon: any): Promise<void> {
     if (!!rawPokemon.evolutions) {
       await this.insertEvolutions(
         connection,
@@ -179,38 +139,25 @@ export default class LoadPokedex implements Seeder {
       await this.insertEvolutions(
         connection,
         rawPokemon,
-        rawPokemon['Previous evolution(s)'].flatMap(
-          (evolution) => evolution.id,
-        ),
+        rawPokemon['Previous evolution(s)'].flatMap((evolution) => evolution.id),
         'previousEvolutions',
       );
     }
   }
 
   public isAttackInserted(attackName: string): AttackEntity {
-    return this.pokemonAttacksInserted.find(
-      (attackEntity) => attackEntity.name === attackName,
-    );
+    return this.pokemonAttacksInserted.find((attackEntity) => attackEntity.name === attackName);
   }
 
-  public async getAndCreatePokemonAttacks(
-    connection: Connection,
-    pokemonAttack: any,
-  ): Promise<AttackEntity[]> {
+  public async getAndCreatePokemonAttacks(connection: Connection, pokemonAttack: any): Promise<AttackEntity[]> {
     const pokemonAttacksEntity: AttackEntity[] = [];
 
     if (!!pokemonAttack) {
       if (!!pokemonAttack.fast) {
         for (let i = 0; i < pokemonAttack.fast.length; i++) {
-          const fastAttackCreated = this.isAttackInserted(
-            pokemonAttack.fast[i].name,
-          );
+          const fastAttackCreated = this.isAttackInserted(pokemonAttack.fast[i].name);
           if (!fastAttackCreated) {
-            const fastAttackEntity = await this.buildAttack(
-              connection,
-              pokemonAttack.fast[i],
-              'fast',
-            );
+            const fastAttackEntity = await this.buildAttack(connection, pokemonAttack.fast[i], 'fast');
             pokemonAttacksEntity.push(fastAttackEntity);
           } else {
             pokemonAttacksEntity.push(fastAttackCreated);
@@ -219,15 +166,9 @@ export default class LoadPokedex implements Seeder {
       }
       if (!!pokemonAttack.special) {
         for (let i = 0; i < pokemonAttack.special.length; i++) {
-          const specialAttackCreated = this.isAttackInserted(
-            pokemonAttack.special[i].name,
-          );
+          const specialAttackCreated = this.isAttackInserted(pokemonAttack.special[i].name);
           if (!specialAttackCreated) {
-            const specialAttackEntity = await this.buildAttack(
-              connection,
-              pokemonAttack.special[i],
-              'special',
-            );
+            const specialAttackEntity = await this.buildAttack(connection, pokemonAttack.special[i], 'special');
             pokemonAttacksEntity.push(specialAttackEntity);
           } else {
             pokemonAttacksEntity.push(specialAttackCreated);
@@ -238,30 +179,19 @@ export default class LoadPokedex implements Seeder {
     return pokemonAttacksEntity;
   }
 
-  public async saveAttackCategories(
-    connection: Connection,
-  ): Promise<AttackTypeEntity[]> {
+  public async saveAttackCategories(connection: Connection): Promise<AttackTypeEntity[]> {
     const fastAttackTypeEntity = new AttackTypeEntity('fast');
     const specialAttackTypeEntity = new AttackTypeEntity('special');
-    return await connection.manager.save([
-      fastAttackTypeEntity,
-      specialAttackTypeEntity,
-    ]);
+    return await connection.manager.save([fastAttackTypeEntity, specialAttackTypeEntity]);
   }
 
-  public async buildAttack(
-    connection: Connection,
-    attack: any,
-    category: string,
-  ): Promise<AttackEntity> {
+  public async buildAttack(connection: Connection, attack: any, category: string): Promise<AttackEntity> {
     const partialAttackEntity = connection.manager.create(AttackEntity, {
       name: attack.name,
       damage: attack.damage,
     });
     const attackEntity = await connection.manager.save(partialAttackEntity);
-    const attackTypeEntity = this.pokemonTypesInserted.find(
-      (pokemonTypeName) => attack.type === pokemonTypeName.type,
-    );
+    const attackTypeEntity = this.pokemonTypesInserted.find((pokemonTypeName) => attack.type === pokemonTypeName.type);
     const attackCategory = this.pokemonAttacksCategories.find(
       (attackTypeEntity) => attackTypeEntity.typeName === category,
     );
